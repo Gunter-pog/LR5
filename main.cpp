@@ -8,83 +8,217 @@
 
 using namespace std;
 
+enum class DrinkingType : int
+{
+    Half,
+    Full,
+    EatGlass
+};
+
+class DrinkingStrategy
+{
+public:
+    virtual ~DrinkingStrategy() {}
+    virtual void Drink() = 0;
+};
+
+class HalfDrinkingStrategy : public DrinkingStrategy
+{
+    void Drink() {cout << "Drinking half of wine";}
+};
+
+class FullDrinkingStrategy : public DrinkingStrategy
+{
+    void Drink() {cout << "Drinking the full bottle of wine";}
+};
+
+class EatGlassStrategy : public DrinkingStrategy
+{
+    void Drink() {cout << "Crazy! Eating the glass after drinking wine";}
+};
+
+DrinkingStrategy* CreateDrinkingStrategy(DrinkingType type)
+{
+    switch(type)
+    {
+        case DrinkingType::Half:
+            return new HalfDrinkingStrategy();
+        case DrinkingType::Full:
+            return new FullDrinkingStrategy();
+        case DrinkingType::EatGlass:
+            return new EatGlassStrategy();
+        default:
+            return nullptr;
+    }
+}
+
 class Wine
 {
 protected:
     string type;
     double degree;
     int volume;
-public:
-    Wine(const string& type, int degree, int volume): type(type), degree(degree), volume(volume){}
 
-    virtual void characteristic_out()
+    DrinkingStrategy *DrinkingType;
+
+    void DrinkUsingStrategy()
+    {
+        if(DrinkingType == nullptr)
+        {
+            cout << "Todat is monday, no wine.";
+            return;
+        }
+        else
+        {
+            DrinkingType -> Drink();
+        }
+    }
+    //Абстрактные методы
+    virtual void OutputSpecificCharacteristics() = 0;
+    virtual void AdditionalInfo() = 0;
+public:
+    Wine(const string& type, int degree, int volume): type(type), degree(degree), volume(volume), DrinkingType(nullptr){}
+
+    virtual ~Wine()
+    {
+      if(DrinkingType != nullptr) delete DrinkingType;
+    }
+
+    void characteristic_out()
     {
         cout << "Type of wine: " << type
         << "; Classic degree: " << degree
-        << "; Classic volume: " << volume << " ml" << endl << endl;
+        << "; Classic volume: " << volume << " ml" << endl;
+        OutputSpecificCharacteristics();
+        cout << endl;
     }
     virtual void amount_of_etyl_alcohol()
     {
-        cout << "Amount of ethyl alcohol: " << volume * (degree / 100) << " ml"<< endl << endl;
+        cout << "Amount of ethyl alcohol: " << volume * (degree / 100) << " ml"<< endl;
     }
 
     string GetType() const { return type; }
     double GetDegree() const { return degree; }
     int GetVolume() const { return volume; }
-};
 
-class White_Wine : public Wine
-{
-private:
-    string my_attitude;
-public:
-    White_Wine(const string& type, int degree, int volume, const string& my_attitude):Wine(type, degree, volume), my_attitude(my_attitude){}
-
-    void characteristic_out()
+    void Drink()
     {
-        Wine::characteristic_out();
-        cout << "My attitude to this wine: " << my_attitude << endl << endl;
+        DrinkUsingStrategy();
     }
 
-    void attitude()
+    void SetDrinkingType(DrinkingStrategy *drinkingType) { DrinkingType = drinkingType; }
+
+    void WineInfo()
     {
-        string att;
-        cout << "What is your attitude to white wine?" << endl;
-        cin >> att;
+        characteristic_out();
+        amount_of_etyl_alcohol();
+        AdditionalInfo();
         cout << endl;
     }
 };
 
-class Red_Wine : public Wine
+class White_Wine : public Wine
 {
-private:
-    int popularity_in_russia;
-public:
-    Red_Wine(const string& type, int degree, int volume, int popularity_in_russia):Wine(type, degree, volume), popularity_in_russia(popularity_in_russia){}
 
-    void characteristic_out()
+private: string my_attitude;
+
+protected:
+
+    void OutputSpecificCharacteristics() override
     {
-        Wine::characteristic_out();
-        cout << "In Russia, the popularity of this type of wine is " << popularity_in_russia << " percent" << endl << endl;
+        cout << "My attitude to this wine: " << my_attitude;
     }
 
-    void info()
+    void AdditionalInfo() override
     {
-        cout << "Italy is a leader in red wine production" << endl << endl;
+        string att;
+        cout << "What is your attitude to white wine?" << endl;
+        cin >> att;
+        cout << "Your attitude: " << att << endl;
+    }
+
+public:
+
+    White_Wine(const string& type, int degree, int volume, const string& my_attitude):Wine(type, degree, volume), my_attitude(my_attitude)
+    {
+        SetDrinkingType(CreateDrinkingStrategy(DrinkingType::Half));
+    }
+};
+
+
+class Red_Wine : public Wine
+{
+
+private: int popularity_in_russia;
+
+protected:
+
+    void OutputSpecificCharacteristics() override
+    {
+        cout << "In Russia, popularity of this wine: " << popularity_in_russia << " %";
+    }
+
+    void AdditionalInfo() override
+    {
+        cout << "Italy is a leader in red wine production!" << endl;
+    }
+
+public:
+
+    Red_Wine(const string& type, int degree, int volume, int popularity_in_russia):Wine(type, degree, volume), popularity_in_russia(popularity_in_russia)
+    {
+        SetDrinkingType(CreateDrinkingStrategy(DrinkingType::Full));
     }
 };
 
 class Sparkling_Wine : public Wine
 {
-private:
-    bool sparkling;
+
+private: bool sparkling;
+
+protected:
+    void OutputSpecificCharacteristics() override
+    {
+        cout << "Sparkling: " << boolalpha << sparkling;
+    }
+
+    void AdditionalInfo() override
+    {
+        for (int i = 0; i < 1; i++)
+        {
+            sleep(1);
+            cout << "\bC" << flush;
+            sleep(1);
+            cout << "\bh" << flush;
+            sleep(1);
+            cout << "\ba" << flush;
+            sleep(1);
+            cout << "\bm" << flush;
+            sleep(1);
+            cout << "\bp" << flush;
+            sleep(1);
+            cout << "\ba" << flush;
+            sleep(1);
+            cout << "\bg" << flush;
+            sleep(1);
+            cout << "\bn" << flush;
+            sleep(1);
+            cout << "\be" << flush;
+        }
+        cout << endl;
+    }
+
 public:
-    Sparkling_Wine(const string& type, int degree, int volume, bool sparkling):Wine(type, degree, volume), sparkling(sparkling){}
+
+    Sparkling_Wine(const string& type, int degree, int volume, bool sparkling):Wine(type, degree, volume), sparkling(sparkling)
+    {
+        SetDrinkingType(CreateDrinkingStrategy(DrinkingType::EatGlass));
+    }
 
     void characteristic_out()
     {
         Wine::characteristic_out();
-        cout << "Sparkling: " << boolalpha << sparkling << endl << endl;
+        cout << "Sparkling: " << boolalpha << sparkling << endl;
     }
 
     void champagne()
@@ -217,8 +351,7 @@ void output(Container& container)
 {
     for (auto i = container.begin(); !i.last_object(); i.next_object())
     {
-        i.actual_object()->characteristic_out();
-        i.actual_object()->amount_of_etyl_alcohol();
+        i.actual_object() -> WineInfo();
     }
 }
 
@@ -228,6 +361,17 @@ void Alcohol(Iterator<Wine*> *i)
     {
         Wine *actual_wine = i -> actual_object();
         actual_wine -> amount_of_etyl_alcohol();
+    }
+}
+
+void DrinkAllWine(Iterator<Wine*> *i)
+{
+    for(i -> first_object(); !i -> last_object(); i -> next_object())
+    {
+        Wine *actualWine = i -> actual_object();
+        actualWine -> Drink();
+        actualWine -> GetType();
+        cout << endl;
     }
 }
 
@@ -246,9 +390,16 @@ int main()
         listic_container.add_object(create_type_of_wine(type));
     }
 
-    cout << "Demo of decorator";
+    //Демонстрация патерна "стратегия"
+    Iterator<Wine*> *allI = vec_container.GetIterator();
+    DrinkAllWine(allI);
+    delete allI;
+    cout << endl;
+
+    cout << "Demo of decorator" << endl;
     Iterator<Wine*> *adapted_sparkling_i = new DegreeOfWineDecorator(listic_container.GetIterator(), 13);
     Alcohol(adapted_sparkling_i);
+    cout << endl;
 
     cout << "Vector Container" << endl;
     output(vec_container);
