@@ -8,7 +8,7 @@
 
 using namespace std;
 
-enum class DrinkingType : int
+enum class DrinkingType
 {
     Half,
     Full,
@@ -370,7 +370,6 @@ void DrinkAllWine(Iterator<Wine*> *i)
     {
         Wine *actualWine = i -> actual_object();
         actualWine -> Drink();
-        actualWine -> GetType();
         cout << endl;
     }
 }
@@ -391,6 +390,7 @@ int main()
     }
 
     //Демонстрация патерна "стратегия"
+    cout << "Demo strategy realization";
     Iterator<Wine*> *allI = vec_container.GetIterator();
     DrinkAllWine(allI);
     delete allI;
